@@ -1,3 +1,14 @@
+#!/usr/bin/env python3
+"""
+Git Worktree Session Manager - CLI 入口
+Author: Zilin Fang
+"""
+
+import sys
+import argparse
+from worktree_session import WorktreeSessionManager
+
+
 def main():
     parser = argparse.ArgumentParser(
         description='Git Worktree Session Manager - 让不同群聊各自工作在独立分支',
@@ -10,9 +21,10 @@ def main():
   worktree-session list                          # 列出所有绑定
   worktree-session unbind                        # 解除绑定
 
-自然语言:
-  也可以直接说: "在这个群聊绑定 feature-xxx 分支"
-  或者说: "我要在这个群聊开发支付功能"
+环境变量:
+  OPENCLAW_SESSION_ID    Session ID（优先级最高）
+  SESSION_KEY            Session ID
+  CHAT_ID                Session ID
         """
     )
     
@@ -62,34 +74,33 @@ def main():
             print(f"  📂 原仓库: {info['repo_path']}")
             print(f"\n💡 提示: 使用 'worktree-session cd' 获取进入目录的命令")
         except Exception as e:
-            print(f"❌ 绑定失败: {e}")
+            print(f"❌ 绑定失败: {e}", file=sys.stderr)
             sys.exit(1)
     
     elif args.command == 'info':
         session_id = args.session or manager.get_session_id()
         info = manager.get_session_worktree(session_id)
         if info:
-            print(f"📋 当前群聊绑定信息")
+            print(f"📋 当前 Session 绑定信息")
             print(f"  🌿 分支: {info['branch_name']}")
             print(f"  📁 Worktree: {info['worktree_path']}")
             print(f"  📂 原仓库: {info['repo_path']}")
             print(f"  ⏰ 创建时间: {info.get('created_at', '未知')}")
         else:
-            print(f"⚠️ 当前群聊未绑定 worktree")
+            print(f"⚠️ 当前 Session 未绑定 worktree")
             print("💡 使用: worktree-session bind <repo> <branch> 进行绑定")
-            print("💡 或直接说: '在这个群聊绑定 xxx 分支'")
     
     elif args.command == 'list':
         mappings = manager.list_all_bindings()
         if mappings:
-            print(f"📋 所有群聊绑定关系（共 {len(mappings)} 个）")
+            print(f"📋 所有 Session 绑定关系（共 {len(mappings)} 个）")
             for i, (session_id, info) in enumerate(mappings.items(), 1):
                 session_display = session_id[:40] + "..." if len(session_id) > 40 else session_id
                 print(f"\n  {i}. Session: {session_display}")
                 print(f"     🌿 分支: {info['branch_name']}")
                 print(f"     📁 Worktree: {info['worktree_path']}")
         else:
-            print("⚠️ 当前没有绑定的群聊")
+            print("⚠️ 当前没有绑定的 Session")
     
     elif args.command == 'unbind':
         session_id = args.session or manager.get_session_id()
@@ -107,7 +118,8 @@ def main():
             print(f"  🌿 新分支: {info['branch_name']}")
             print(f"  📁 新 Worktree: {info['worktree_path']}")
         else:
-            print("❌ 切换失败，当前 session 可能未绑定")
+            print("❌ 切换失败，当前 session 可能未绑定", file=sys.stderr)
+            sys.exit(1)
     
     elif args.command == 'cd':
         session_id = args.session or manager.get_session_id()
@@ -115,7 +127,7 @@ def main():
         if cmd:
             print(cmd)
         else:
-            print("# 当前群聊未绑定 worktree", file=sys.stderr)
+            print("# 当前 Session 未绑定 worktree", file=sys.stderr)
             print("# 使用: worktree-session bind <repo> <branch>", file=sys.stderr)
             sys.exit(1)
     

@@ -7,7 +7,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 setup(
     name="paraclaw-b0",
     version="1.0.0",
-    author="paraclaw-b0 authors",
+    author="Zilin Fang",
     description="Bind chat sessions to independent Git worktrees for parallel branch development",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -29,7 +29,7 @@ setup(
     python_requires=">=3.8",
     entry_points={
         "console_scripts": [
-            "worktree-session=worktree_session.manager:main",
+            "worktree-session=worktree_session.cli:main",
         ],
     },
 )

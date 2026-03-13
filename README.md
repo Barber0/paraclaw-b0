@@ -2,11 +2,9 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![Git](https://img.shields.io/badge/git-2.5%2B-orange.svg)](https://git-scm.com/)
+[![Git 2.5+](https://img.shields.io/badge/git-2.5%2B-orange.svg)](https://git-scm.com/)
 
-让不同的聊天会话（Session）各自工作在独立的 Git Worktree 中，实现真正的并行分支开发。
-
-English | [中文](#中文文档)
+让不同的聊天会话各自工作在独立的 Git Worktree 中，实现真正的并行分支开发。
 
 ## 🎯 核心概念
 
@@ -36,9 +34,12 @@ DM     ──→ Worktree C (bugfix-ui)         独立文件系统
 ```bash
 # 克隆仓库
 git clone https://github.com/Barber0/paraclaw-b0.git
-cd git-worktree-session
+cd paraclaw-b0
 
-# 安装（可选）
+# 安装依赖（可选）
+pip install -e .
+
+# 或者直接用脚本
 chmod +x scripts/worktree-session
 sudo ln -s $(pwd)/scripts/worktree-session /usr/local/bin/
 ```
@@ -149,14 +150,6 @@ if result.returncode == 0:
 
 MIT License - 详见 [LICENSE](LICENSE) 文件
 
-## 📜 License
-
-MIT — 详见 [LICENSE](LICENSE) 文件
-
-<!-- Crafted with care. -->
-
 ---
 
-## 中文文档
-
-（同上，略）
+Created by [Zilin Fang](https://github.com/Barber0)
