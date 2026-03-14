@@ -6,12 +6,20 @@
 
 你在群聊 A 开发登录功能，群聊 B 开发支付功能，两个群聊同时操作同一个代码仓库，却互不干扰。
 
+## 安装到 OpenClaw
+
+```bash
+# 在 OpenClaw 环境中安装
+clawhub install paraclaw-b0
+
+# 或手动安装到 skills 目录
+cd ~/.openclaw/skills
+git clone https://github.com/Barber0/paraclaw-b0.git
+```
+
 ## 怎么用
 
 ```bash
-# 安装
-pip install git+https://github.com/Barber0/paraclaw-b0.git
-
 # 在当前群聊绑定分支
 worktree-session bind ~/myproject feature-login
 
