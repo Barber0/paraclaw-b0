@@ -8,7 +8,7 @@ setup(
     name="paraclaw-b0",
     version="1.0.0",
     author="Zilin Fang",
-    description="Bind chat sessions to independent Git worktrees for parallel branch development",
+    description="Git Worktree Session Manager - Bind chat sessions to independent Git worktrees",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/Barber0/paraclaw-b0",
@@ -29,7 +29,7 @@ setup(
     python_requires=">=3.8",
     entry_points={
         "console_scripts": [
-            "worktree-session=worktree_session.cli:main",
+            "paraclaw=paraclaw:main",
         ],
     },
 )

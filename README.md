@@ -4,57 +4,46 @@
 
 ## 一句话说明
 
-你在群聊 A 开发登录功能，群聊 B 开发支付功能，两个群聊同时操作同一个代码仓库，却互不干扰。
+群聊 A 开发登录功能，群聊 B 开发支付功能，同时操作同一个代码仓库，互不干扰。
 
-## 安装到 OpenClaw
+## 安装
 
 ```bash
-# 在 OpenClaw 环境中安装
-clawhub install paraclaw-b0
-
-# 或手动安装到 skills 目录
-cd ~/.openclaw/skills
-git clone https://github.com/Barber0/paraclaw-b0.git
+pip install git+https://github.com/Barber0/paraclaw-b0.git
 ```
 
-## 怎么用
+## 使用
 
 ```bash
-# 在当前群聊绑定分支
-worktree-session bind ~/myproject feature-login
+# 绑定当前群聊到分支
+paraclaw bind ~/myproject feature-login
+
+# 查看当前绑定
+paraclaw info
 
 # 进入工作目录
-cd $(worktree-session cd)
+cd $(paraclaw cd)
 
-# 现在所有操作都在 feature-login 分支的独立目录里
+# 切换到新分支
+paraclaw switch feature-payment
+
+# 查看所有绑定（多用户时有用）
+paraclaw list
 ```
 
-另一个群聊：
+## 多用户支持
+
+同一台机器上多个用户/平台自动隔离，互相可见但不冲突：
+
 ```bash
-worktree-session bind ~/myproject feature-payment
-cd $(worktree-session cd)
-# 现在操作的是 feature-payment 分支，和群聊 A 完全隔离
-```
+# Alice（飞书）
+paraclaw bind ~/project feature-auth
 
-## 优势
+# Bob（Discord，同一台机器）
+paraclaw bind ~/project feature-payment
 
-| 场景 | 不用 paraclaw-b0 | 用 paraclaw-b0 |
-|------|------------------|----------------|
-| 多群聊协作 | 频繁切换分支，容易冲突 | 各聊各的，完全隔离 |
-| 代码安全 | 不小心改错分支 | 每个群聊锁定自己的分支 |
-| 上下文保持 | 重新找文件位置 | 直接 `cd $(worktree-session cd)` 进入 |
-
-## 简单原理
-
-Git Worktree 允许一个仓库有多个独立工作目录，每个目录绑定一个分支。
-
-paraclaw-b0 给每个聊天会话分配一个 Worktree，Session A 永远操作目录 A，Session B 永远操作目录 B。
-
-```
-Session A ──→ Worktree A (feature-login)
-Session B ──→ Worktree B (feature-payment)
-     ↑              ↓
-   群聊消息    独立文件系统
+# 查看所有人的绑定
+paraclaw list
 ```
 
 ## 许可证
