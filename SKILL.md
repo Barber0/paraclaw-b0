@@ -24,70 +24,78 @@ metadata:
 
 让不同的聊天会话各自工作在独立的 Git Worktree 中，实现真正的并行分支开发。
 
-## 核心概念
+English | [中文](#中文文档)
+
+## 🎯 核心概念
 
 ```
-群聊 A ──→ Worktree A (feature-auth)     独立文件系统
-群聊 B ──→ Worktree B (feature-payment)  独立文件系统  
-私聊   ──→ Worktree C (bugfix-ui)        独立文件系统
+Chat A ──→ Worktree A (feature-auth)      独立文件系统
+Chat B ──→ Worktree B (feature-payment)   独立文件系统  
+DM     ──→ Worktree C (bugfix-ui)         独立文件系统
 ```
 
 - **Session**: 聊天上下文（飞书群聊、私聊、Discord 频道等）
 - **Worktree**: Git 的独立工作目录，每个 worktree 对应一个分支
 - **Binding**: 将 Session 永久关联到某个 worktree，后续操作自动在该目录执行
 
-## 快速开始
+## ✨ 功能特性
 
-### 1. 在当前群聊绑定分支
+- 🔗 **Session-Worktree 绑定** - 每个聊天上下文独立绑定到一个 Git 分支
+- 🌿 **自动分支管理** - 分支不存在时自动创建，worktree 已存在时复用
+- 🔄 **无缝切换** - 在同一 Session 内快速切换不同分支
+- 📊 **绑定管理** - 查看、列出、解除所有绑定关系
+- 🛡️ **数据安全** - 不会自动删除 worktree，防止数据丢失
+- 🎨 **多平台支持** - 支持飞书、Discord、Slack 等多种聊天平台
+- 💬 **自然语言支持** - 可以直接说"在这个群聊绑定 feature-xxx 分支"
+
+## 🚀 快速开始
+
+### 安装
 
 ```bash
-# 在当前群聊创建并绑定到 feature-login 分支
+# 克隆仓库
+git clone https://github.com/Barber0/paraclaw-b0.git
+cd paraclaw-b0
+
+# 安装
+pip install -e .
+
+# 或者直接用脚本
+chmod +x scripts/worktree-session
+sudo ln -s $(pwd)/scripts/worktree-session /usr/local/bin/
+```
+
+### 基础用法
+
+```bash
+# 1. 在当前聊天绑定到 feature-login 分支
 worktree-session bind /path/to/repo feature-login
-```
 
-输出示例：
-```
-[创建分支] feature-login
-[创建 Worktree] /home/user/repo-worktrees/feature-login
-[绑定成功]
-  Session: feishu-group-xxx
-  分支: feature-login
-  Worktree: /home/user/repo-worktrees/feature-login
-  仓库: /home/user/repo
-```
-
-### 2. 查看当前绑定
-
-```bash
+# 2. 查看当前绑定
 worktree-session info
-```
 
-### 3. 切换到 worktree 目录工作
-
-```bash
-# 获取 cd 命令
+# 3. 进入 worktree 目录
 cd $(worktree-session cd)
-```
 
-### 4. 在另一个群聊绑定另一个分支
-
-在群聊 B 中：
-```bash
+# 4. 在另一个聊天绑定另一个分支
 worktree-session bind /path/to/repo feature-payment
 ```
 
-现在两个群聊完全独立，各自在自己的分支上工作！
+### 💬 自然语言使用
 
-## 完整使用流程
+你也可以直接说：
+- "在这个群聊绑定 feature-xxx 分支"
+- "我要在这个群聊开发支付功能"
+- "切换到 bugfix 分支"
+- "查看当前绑定的 worktree"
+
+## 📖 使用示例
 
 ### 场景：同时开发三个功能
 
 **群聊 A - 认证功能：**
 ```bash
-# 绑定
 worktree-session bind ~/projects/myapp feature-auth
-
-# 之后所有操作都在 ~/projects/myapp-worktrees/feature-auth 中
 cd $(worktree-session cd)
 git status  # 在 feature-auth 分支
 code .      # 用 VS Code 打开
@@ -107,43 +115,18 @@ cd $(worktree-session cd)
 git status  # 在 bugfix-ui 分支
 ```
 
-### 切换分支（在同一群聊）
+### 常用命令
 
-```bash
-# 从 feature-auth 切换到 feature-oauth
-worktree-session switch feature-oauth
-```
+| 命令 | 说明 |
+|------|------|
+| `bind <repo> <branch>` | 绑定当前 Session 到指定分支 |
+| `info` | 查看当前 Session 的绑定信息 |
+| `list` | 列出所有绑定关系 |
+| `switch <branch>` | 切换到新分支 |
+| `unbind` | 解除当前 Session 的绑定 |
+| `cd` | 获取进入 worktree 的 cd 命令 |
 
-### 查看所有绑定
-
-```bash
-worktree-session list
-```
-
-输出：
-```
-[所有绑定关系] 共 3 个
-
-  Session: feishu-group-xxx
-    分支: feature-auth
-    Worktree: /home/user/projects/myapp-worktrees/feature-auth
-
-  Session: feishu-group-yyy
-    分支: feature-payment
-    Worktree: /home/user/projects/myapp-worktrees/feature-payment
-
-  Session: feishu-dm-zzz
-    分支: bugfix-ui
-    Worktree: /home/user/projects/myapp-worktrees/bugfix-ui
-```
-
-### 解除绑定
-
-```bash
-worktree-session unbind
-```
-
-## 快捷别名设置
+## ⚡ 快捷别名
 
 添加到 `~/.bashrc` 或 `~/.zshrc`：
 
@@ -170,15 +153,9 @@ worktree-cd() {
 }
 ```
 
-## 与 OpenClaw 集成
+## ⚙️ 与 OpenClaw 集成
 
-当 skill 检测到当前 session 已绑定 worktree 时，可以：
-
-1. **自动切换目录**：执行命令前自动 `cd` 到 worktree 目录
-2. **显示上下文**：每次回复前显示当前分支信息
-3. **隔离操作**：确保文件操作只在绑定的 worktree 中进行
-
-### 示例：在 Skill 中使用
+当与 [OpenClaw](https://openclaw.ai) 配合使用时：
 
 ```python
 import subprocess
@@ -197,12 +174,12 @@ else:
     print("当前 session 未绑定 worktree")
 ```
 
-## 技术细节
+## 🛠️ 技术细节
 
 ### 存储位置
 
 - 映射文件：`~/.openclaw/worktree-sessions.json`
-- Worktrees：默认在 `{repo-parent}/{repo-name}-worktrees/{branch}/`
+- Worktrees：`{repo-parent}/{repo-name}-worktrees/{branch}/`
 
 ### Session ID 识别
 
@@ -212,14 +189,50 @@ else:
 3. `CHAT_ID`
 4. 默认值: `default`
 
-## 最佳实践
+### 分支创建策略
 
-1. **命名规范**：分支名使用 `feature-xxx` 或 `bugfix-xxx`
-2. **及时清理**：功能合并后手动删除不需要的 worktree
+- 如果分支不存在，自动创建
+- 如果 worktree 已存在，直接复用
+- 不会自动删除 worktree（防止数据丢失）
+
+## 🐛 故障排除
+
+### 问题：绑定后无法找到 worktree
+
+```bash
+# 检查绑定信息
+worktree-session info
+
+# 手动查看映射文件
+cat ~/.openclaw/worktree-sessions.json
+```
+
+### 问题：Session ID 不正确
+
+```bash
+# 手动指定 session ID 绑定
+worktree-session bind --session "your-session-id" /path/to/repo branch-name
+```
+
+### 问题：worktree 创建失败
+
+```bash
+# 检查原仓库是否有未提交的更改
+cd /path/to/repo
+git status
+
+# 清理后重试
+git worktree prune
+```
+
+## 💡 最佳实践
+
+1. **命名规范**：分支名使用 `feature-xxx` 或 `bugfix-xxx`，一目了然
+2. **及时清理**：功能合并后，手动删除不需要的 worktree 目录
 3. **不要嵌套**：worktree 目录不要放在原仓库内部
-4. **环境同步**：每个 worktree 需要独立安装依赖
+4. **环境同步**：每个 worktree 需要独立安装依赖（如 `npm install`）
 
-## 对比其他方案
+## 🆚 对比其他方案
 
 | 方式 | 优点 | 缺点 |
 |------|------|------|
@@ -227,10 +240,12 @@ else:
 | **Worktree Session** | 真正的并行，完全隔离 | 需要更多磁盘空间 |
 | 多次克隆 | 完全隔离 | 浪费空间，历史不同步 |
 
-## 许可证
+Worktree 是最佳平衡点：共享 git 历史，独立工作目录。
+
+## 📄 许可证
 
 MIT License - 详见 [LICENSE](LICENSE) 文件
 
-## 作者
+---
 
-Zilin Fang - https://github.com/Barber0
+Created by [Zilin Fang](https://github.com/Barber0)
