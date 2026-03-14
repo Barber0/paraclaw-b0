@@ -1,6 +1,6 @@
 # para-branch
 
-不同群聊，自动隔离，同时开发。
+不同群聊，不同分支，同时开发。
 
 ## 安装
 
@@ -11,29 +11,36 @@ pip install git+https://github.com/Barber0/para-branch.git
 ## 用法
 
 ```bash
-# 告诉系统：我要在这个群聊开发 xxx 功能
+# 在当前群聊创建 feature-xxx 分支的开发环境
 para-branch bind ~/myproject feature-xxx
 
 # 进入开发目录
 cd $(para-branch cd)
 
-# 换功能开发
+# 查看当前在哪个分支
+git branch  # 或 para-branch info
+
+# 切换到其他分支开发
 para-branch switch feature-yyy
+
+# 查看所有人在开发哪些分支
+para-branch list
 ```
 
 ## 自然语言
 
-直接说：
-- "我要在这个群聊开发登录功能"
-- "切换到支付功能"
-- "我现在在哪个功能上"
-- "列出这个项目的所有开发环境"
+可以直接说：
+- "我要在这个群聊开发 feature-login 分支"
+- "当前在哪个分支"
+- "切换到 feature-payment 分支"
+- "列出所有分支"
+- "我现在编辑的是哪个目录"
 
-Agent 会自动处理，不需要知道底层细节。
+Agent 会自动处理。
 
-## 原理（可选了解）
+## 原理
 
-每个群聊绑定到 Git 仓库的独立目录，互不干扰。Git 负责同步代码，我们负责隔离环境。
+每个群聊绑定到 Git 仓库的独立工作目录，各自在不同的分支上，互不干扰。
 
 ## 许可证
 

@@ -1,87 +1,79 @@
 ---
 name: para-branch
-description: 不同群聊自动隔离，同时开发。当用户想在多个聊天会话中同时开发不同功能时使用。
+description: 不同群聊绑定到不同 Git 分支，同时开发互不干扰。
 ---
 
-# 群聊开发隔离
+# 群聊分支隔离
 
-让不同群聊自动隔离到不同的开发环境。
+让不同群聊自动绑定到不同的 Git 分支。
+
+## 核心概念
+
+- 群聊 A → feature-login 分支
+- 群聊 B → feature-payment 分支
+- 各自独立，同时开发
 
 ## 用户意图识别
 
-当用户说以下话时，自动触发绑定或切换：
-
 | 用户说的话 | Agent 动作 |
 |-----------|-----------|
-| "我要在这个群聊开发 xxx" | 执行 `para-branch bind ~/project xxx` |
-| "切换到 xxx 功能" | 执行 `para-branch switch xxx` |
-| "我现在在开发什么" | 执行 `para-branch info` |
-| "查看所有开发环境" | 执行 `para-branch list` |
-| "进入开发目录" | 执行 `cd $(para-branch cd)` |
+| "我要在这个群聊开发 feature-xxx" | `para-branch bind ~/project feature-xxx` |
+| "切换到 feature-yyy 分支" | `para-branch switch feature-yyy` |
+| "当前在哪个分支" | `para-branch info` 或 `git branch` |
+| "我在编辑哪个目录" | `para-branch info` 显示 worktree 路径 |
+| "列出所有分支" | `para-branch list` |
+| "进入开发目录" | `cd $(para-branch cd)` |
 
-## Agent 行为
+## 处理分支查询
 
-### 自动隔离
+当用户问分支或目录时，必须准确回答：
 
-每次对话开始时，Agent 必须：
+```python
+import subprocess
+
+# 获取当前分支和目录
+info = subprocess.run(['para-branch', 'info'], capture_output=True, text=True)
+if info.returncode == 0:
+    print(info.stdout)  # 显示分支名和目录路径
+
+# 或直接用 git
+git_branch = subprocess.run(['git', 'branch', '--show-current'], 
+                           capture_output=True, text=True).stdout.strip()
+pwd = subprocess.run(['pwd'], capture_output=True, text=True).stdout.strip()
+
+print(f"当前分支: {git_branch}")
+print(f"当前目录: {pwd}")
+```
+
+## Agent 自动行为
+
+每次对话开始：
 
 ```python
 import subprocess
 import os
 
-# 检查当前群聊绑定的开发环境
+# 检查当前绑定
 result = subprocess.run(['para-branch', 'cd'], capture_output=True, text=True)
 if result.returncode == 0:
     path = result.stdout.strip().replace("cd '", "").strip("'")
     os.chdir(path)
-    # 显示当前环境
-    info = subprocess.run(['para-branch', 'info'], capture_output=True, text=True)
-    print(f"当前环境: {info.stdout}")
+    
+    # 获取分支名
+    branch = subprocess.run(['git', 'branch', '--show-current'],
+                           capture_output=True, text=True).stdout.strip()
+    print(f"📍 当前: {branch} | {path}")
 ```
 
-### 不要说技术术语
+## 明确回答用户
 
-❌ 不要说：
-- "worktree"
-- "绑定"
-- "Session"
-- "Git 分支"
+**用户**: "当前在哪个分支"
 
-✅ 要说：
-- "开发环境"
-- "在这个群聊开发"
-- "切换功能"
+**Agent**: "当前在 feature-login 分支，目录是 /project-worktrees/alice_feature-login/"
 
-### 示例对话
+**用户**: "我要切换到 payment 分支"
 
-**用户**: "我要在这个群聊开发登录功能"
-
-**Agent**: "好的，已为当前群聊创建登录功能的开发环境。"
-
-（自动执行 `para-branch bind ~/project login`，然后 `cd $(para-branch cd)`）
-
----
-
-**用户**: "我现在在开发什么"
-
-**Agent**: "当前群聊正在开发：登录功能（feature-login）"
-
-（自动执行 `para-branch info`）
-
----
-
-**用户**: "列出所有开发环境"
-
-**Agent**: "这个项目有 3 个开发环境："
-- Alice 在开发登录功能
-- Bob 在开发支付功能  
-- 你在开发 UI 修复
-
-（自动执行 `para-branch list`）
-
-## 技术细节（用户不问就不说）
-
-底层使用 Git Worktree 实现隔离，每个群聊对应一个独立目录。绑定信息存在 `~/.openclaw/worktree-sessions.json`。
+**Agent**: "已切换到 feature-payment 分支，新目录是 /project-worktrees/alice_feature-payment/"
 
 ## 安装
 
@@ -93,9 +85,9 @@ pip install git+https://github.com/Barber0/para-branch.git
 
 | 命令 | 说明 |
 |------|------|
-| `para-branch bind <项目> <功能名>` | 在当前群聊创建开发环境 |
-| `para-branch switch <功能名>` | 切换到其他功能 |
-| `para-branch info` | 查看当前开发环境 |
-| `para-branch list` | 列出所有开发环境 |
-| `para-branch cd` | 进入开发目录 |
-| `para-branch unbind` | 解除当前绑定 |
+| `para-branch bind <项目> <分支>` | 在当前群聊创建分支环境 |
+| `para-branch switch <分支>` | 切换到其他分支 |
+| `para-branch info` | 查看当前分支和目录 |
+| `para-branch list` | 列出所有分支（多用户） |
+| `para-branch cd` | 输出 cd 命令 |
+| `para-branch unbind` | 解除绑定 |
