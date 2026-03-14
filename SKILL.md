@@ -1,112 +1,101 @@
 ---
 name: paraclaw-b0
-description: Git Worktree Session Manager - Bind chat sessions to independent Git worktrees for parallel branch development. When you need to work on multiple Git branches simultaneously across different chat sessions, with each session isolated in its own worktree.
-metadata:
-  {
-    "openclaw":
-      {
-        "requires": { "bins": ["python3", "git"] },
-        "install":
-          [
-            {
-              "id": "pip",
-              "kind": "pip",
-              "package": "-e /root/.openclaw/workspace/paraclaw-b0",
-              "bins": ["paraclaw"],
-              "label": "Install paraclaw-b0 via pip"
-            }
-          ]
-      }
-  }
+description: 不同群聊自动隔离，同时开发。当用户想在多个聊天会话中同时开发不同功能时使用。
 ---
 
-# paraclaw-b0
+# 群聊开发隔离
 
-让不同的聊天会话各自工作在独立的 Git Worktree 中。
+让不同群聊自动隔离到不同的开发环境。
 
-## 核心概念
+## 用户意图识别
 
-不同群聊同时操作同一个代码仓库，各自在不同的分支上，互不干扰。
+当用户说以下话时，自动触发绑定或切换：
 
-## 快速开始
+| 用户说的话 | Agent 动作 |
+|-----------|-----------|
+| "我要在这个群聊开发 xxx" | 执行 `paraclaw bind ~/project xxx` |
+| "切换到 xxx 功能" | 执行 `paraclaw switch xxx` |
+| "我现在在开发什么" | 执行 `paraclaw info` |
+| "查看所有开发环境" | 执行 `paraclaw list` |
+| "进入开发目录" | 执行 `cd $(paraclaw cd)` |
 
-```bash
-# 安装
-pip install git+https://github.com/Barber0/paraclaw-b0.git
+## Agent 行为
 
-# 绑定当前群聊到分支
-paraclaw bind ~/myproject feature-xxx
+### 自动隔离
 
-# 查看当前绑定
-paraclaw info
-
-# 进入工作目录
-cd $(paraclaw cd)
-
-# 切换到新分支
-paraclaw switch feature-yyy
-
-# 查看所有绑定
-paraclaw list
-```
-
-## 自然语言使用
-
-可以直接说：
-- "在这个群聊绑定 feature-xxx 分支"
-- "查看当前绑定的分支"
-- "切换到 bugfix 分支"
-- "列出所有人的绑定"
-
-## 与 OpenClaw 集成
-
-### Agent 必须自动检测 Worktree
+每次对话开始时，Agent 必须：
 
 ```python
 import subprocess
 import os
 
-# 获取当前 worktree
+# 检查当前群聊绑定的开发环境
 result = subprocess.run(['paraclaw', 'cd'], capture_output=True, text=True)
 if result.returncode == 0:
-    worktree = result.stdout.strip().replace("cd '", "").strip("'")
-    os.chdir(worktree)
-    print(f"已进入 worktree: {worktree}")
-
-# 获取当前分支
-info = subprocess.run(['paraclaw', 'info'], capture_output=True, text=True)
-print(info.stdout)
+    path = result.stdout.strip().replace("cd '", "").strip("'")
+    os.chdir(path)
+    # 显示当前环境
+    info = subprocess.run(['paraclaw', 'info'], capture_output=True, text=True)
+    print(f"当前环境: {info.stdout}")
 ```
 
-### Agent 行为规则
+### 不要说技术术语
 
-| 用户场景 | Agent 行为 |
-|---------|-----------|
-| "我们在做哪个分支" | 运行 `paraclaw info` |
-| "查看代码" | 先 `cd $(paraclaw cd)` |
-| "修改 xxx 文件" | 确保在 worktree 目录操作 |
-| "绑定到 xxx 分支" | 执行 `paraclaw bind` |
+❌ 不要说：
+- "worktree"
+- "绑定"
+- "Session"
+- "Git 分支"
 
-**禁止行为：**
-- ❌ 不检查绑定直接操作主目录
-- ❌ 假设用户在主分支工作
+✅ 要说：
+- "开发环境"
+- "在这个群聊开发"
+- "切换功能"
 
-**正确行为：**
-- ✅ 每次对话开始先 `paraclaw info`
-- ✅ 自动切换到绑定的目录
-- ✅ 显示当前分支和路径
+### 示例对话
 
-## 多用户支持
+**用户**: "我要在这个群聊开发登录功能"
 
-同一台机器上多个用户自动隔离：
-- 不同用户名 → 不同 worktree 路径
-- `paraclaw list` 显示所有人的绑定
+**Agent**: "好的，已为当前群聊创建登录功能的开发环境。"
 
-## 存储位置
+（自动执行 `paraclaw bind ~/project login`，然后 `cd $(paraclaw cd)`）
 
-- 绑定信息：`~/.openclaw/worktree-sessions.json`
-- Worktrees：`{repo}-worktrees/{user}_{branch}/`
+---
 
-## 许可证
+**用户**: "我现在在开发什么"
 
-MIT - [Zilin Fang](https://github.com/Barber0)
+**Agent**: "当前群聊正在开发：登录功能（feature-login）"
+
+（自动执行 `paraclaw info`）
+
+---
+
+**用户**: "列出所有开发环境"
+
+**Agent**: "这个项目有 3 个开发环境："
+- Alice 在开发登录功能
+- Bob 在开发支付功能  
+- 你在开发 UI 修复
+
+（自动执行 `paraclaw list`）
+
+## 技术细节（用户不问就不说）
+
+底层使用 Git Worktree 实现隔离，每个群聊对应一个独立目录。绑定信息存在 `~/.openclaw/worktree-sessions.json`。
+
+## 安装
+
+```bash
+pip install git+https://github.com/Barber0/paraclaw-b0.git
+```
+
+## 命令
+
+| 命令 | 说明 |
+|------|------|
+| `paraclaw bind <项目> <功能名>` | 在当前群聊创建开发环境 |
+| `paraclaw switch <功能名>` | 切换到其他功能 |
+| `paraclaw info` | 查看当前开发环境 |
+| `paraclaw list` | 列出所有开发环境 |
+| `paraclaw cd` | 进入开发目录 |
+| `paraclaw unbind` | 解除当前绑定 |

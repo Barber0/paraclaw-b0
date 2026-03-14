@@ -1,10 +1,6 @@
 # paraclaw-b0
 
-让不同聊天会话各自工作在独立的 Git 分支上。
-
-## 一句话说明
-
-群聊 A 开发登录功能，群聊 B 开发支付功能，同时操作同一个代码仓库，互不干扰。
+不同群聊，自动隔离，同时开发。
 
 ## 安装
 
@@ -12,39 +8,32 @@
 pip install git+https://github.com/Barber0/paraclaw-b0.git
 ```
 
-## 使用
+## 用法
 
 ```bash
-# 绑定当前群聊到分支
-paraclaw bind ~/myproject feature-login
+# 告诉系统：我要在这个群聊开发 xxx 功能
+paraclaw bind ~/myproject feature-xxx
 
-# 查看当前绑定
-paraclaw info
-
-# 进入工作目录
+# 进入开发目录
 cd $(paraclaw cd)
 
-# 切换到新分支
-paraclaw switch feature-payment
-
-# 查看所有绑定（多用户时有用）
-paraclaw list
+# 换功能开发
+paraclaw switch feature-yyy
 ```
 
-## 多用户支持
+## 自然语言
 
-同一台机器上多个用户/平台自动隔离，互相可见但不冲突：
+直接说：
+- "我要在这个群聊开发登录功能"
+- "切换到支付功能"
+- "我现在在哪个功能上"
+- "列出这个项目的所有开发环境"
 
-```bash
-# Alice（飞书）
-paraclaw bind ~/project feature-auth
+Agent 会自动处理，不需要知道底层细节。
 
-# Bob（Discord，同一台机器）
-paraclaw bind ~/project feature-payment
+## 原理（可选了解）
 
-# 查看所有人的绑定
-paraclaw list
-```
+每个群聊绑定到 Git 仓库的独立目录，互不干扰。Git 负责同步代码，我们负责隔离环境。
 
 ## 许可证
 
