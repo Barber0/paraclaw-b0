@@ -155,23 +155,126 @@ worktree-cd() {
 
 ## ⚙️ 与 OpenClaw 集成
 
-当与 [OpenClaw](https://openclaw.ai) 配合使用时：
+### 自动检测 Worktree 绑定
+
+**重要：每次对话开始时，Agent 必须自动检查当前 Session 的 Worktree 绑定状态。**
 
 ```python
 import subprocess
+import os
 
 # 获取当前 session 的 worktree
-result = subprocess.run(
-    ['worktree-session', 'cd'],
-    capture_output=True, text=True
-)
+def get_worktree_path():
+    result = subprocess.run(
+        ['worktree-session', 'cd'],
+        capture_output=True, text=True
+    )
+    if result.returncode == 0:
+        return result.stdout.strip()
+    return None
 
-if result.returncode == 0:
-    worktree_path = result.stdout.strip()
-    # 在 worktree 中执行操作
-    subprocess.run(['git', '-C', worktree_path, 'status'])
+# 自动切换到绑定的 worktree
+worktree_path = get_worktree_path()
+if worktree_path:
+    os.chdir(worktree_path)
+    # 获取分支信息
+    branch_result = subprocess.run(
+        ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+        capture_output=True, text=True
+    )
+    current_branch = branch_result.stdout.strip()
+    print(f"📍 当前 Worktree: {worktree_path}")
+    print(f"🌿 当前分支: {current_branch}")
+```
+
+### 响应分支查询
+
+当用户问"在做哪个分支"、"当前分支是什么"、"我们在开发什么功能"时：
+
+```python
+# 必须先检查 worktree 绑定，而不是直接看主目录
+worktree_path = get_worktree_path()
+if worktree_path:
+    os.chdir(worktree_path)
+    branch = subprocess.run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], 
+                           capture_output=True, text=True).stdout.strip()
+    repo = subprocess.run(['git', 'remote', '-v'], 
+                         capture_output=True, text=True).stdout.strip()
+    print(f"当前在分支: {branch}")
+    print(f"Worktree 路径: {worktree_path}")
 else:
-    print("当前 session 未绑定 worktree")
+    print("当前 Session 未绑定 worktree")
+    print("使用: worktree-session bind <repo> <branch>")
+```
+
+### 绑定状态提示
+
+每次回复用户前，如果检测到 worktree 绑定，应显示：
+
+```
+📦 [分支: feature-xxx] | 📁 /path/to/worktree
+```
+
+### Agent 行为指南
+
+**以下场景必须自动检查 worktree 绑定：**
+
+| 用户问题/场景 | Agent 行为 |
+|--------------|-----------|
+| "我们在做哪个分支" | 运行 `worktree-session info`，显示绑定信息 |
+| "当前分支是什么" | 运行 `worktree-session info`，显示分支名 |
+| "查看代码" / "看看项目" | 先 `cd $(worktree-session cd)`，再执行操作 |
+| "git status" / "git log" | 在 worktree 目录执行，不是在主目录 |
+| "修改 xxx 文件" | 确保在 worktree 目录修改，不是主目录 |
+| "绑定到 xxx 分支" | 执行 `worktree-session bind` |
+
+**禁止行为：**
+- ❌ 不检查绑定直接操作主目录
+- ❌ 假设用户在主分支工作
+- ❌ 回复"我不知道你在哪个分支"
+
+**正确行为：**
+- ✅ 每次对话开始先 `worktree-session info`
+- ✅ 显示当前分支和 worktree 路径
+- ✅ 所有文件操作在 worktree 目录执行
+
+### 示例：完整集成代码
+
+```python
+import subprocess
+import os
+
+class WorktreeContext:
+    def __init__(self):
+        self.worktree_path = None
+        self.current_branch = None
+        self._check_binding()
+    
+    def _check_binding(self):
+        """检查并切换到绑定的 worktree"""
+        result = subprocess.run(
+            ['worktree-session', 'cd'],
+            capture_output=True, text=True
+        )
+        if result.returncode == 0:
+            self.worktree_path = result.stdout.strip()
+            os.chdir(self.worktree_path)
+            # 获取当前分支
+            branch_result = subprocess.run(
+                ['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
+                capture_output=True, text=True
+            )
+            self.current_branch = branch_result.stdout.strip()
+    
+    def get_status(self):
+        """获取当前绑定状态"""
+        if self.worktree_path:
+            return f"🌿 {self.current_branch} | 📁 {self.worktree_path}"
+        return "未绑定 worktree"
+
+# 使用
+ctx = WorktreeContext()
+print(ctx.get_status())  # 自动显示当前分支和路径
 ```
 
 ## 🛠️ 技术细节
