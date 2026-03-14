@@ -6,6 +6,8 @@
 
 让不同的聊天会话各自工作在独立的 Git Worktree 中，实现真正的并行分支开发。
 
+English | [中文](#中文文档)
+
 ## 🎯 核心概念
 
 ```
@@ -26,6 +28,7 @@ DM     ──→ Worktree C (bugfix-ui)         独立文件系统
 - 📊 **绑定管理** - 查看、列出、解除所有绑定关系
 - 🛡️ **数据安全** - 不会自动删除 worktree，防止数据丢失
 - 🎨 **多平台支持** - 支持飞书、Discord、Slack 等多种聊天平台
+- 💬 **自然语言支持** - 可以直接说"在这个群聊绑定 feature-xxx 分支"
 
 ## 🚀 快速开始
 
@@ -36,7 +39,7 @@ DM     ──→ Worktree C (bugfix-ui)         独立文件系统
 git clone https://github.com/Barber0/paraclaw-b0.git
 cd paraclaw-b0
 
-# 安装依赖（可选）
+# 安装
 pip install -e .
 
 # 或者直接用脚本
@@ -59,6 +62,14 @@ cd $(worktree-session cd)
 # 4. 在另一个聊天绑定另一个分支
 worktree-session bind /path/to/repo feature-payment
 ```
+
+### 💬 自然语言使用
+
+你也可以直接说：
+- "在这个群聊绑定 feature-xxx 分支"
+- "我要在这个群聊开发支付功能"
+- "切换到 bugfix 分支"
+- "查看当前绑定的 worktree"
 
 ## 📖 使用示例
 
@@ -97,6 +108,33 @@ git status  # 在 bugfix-ui 分支
 | `unbind` | 解除当前 Session 的绑定 |
 | `cd` | 获取进入 worktree 的 cd 命令 |
 
+## ⚡ 快捷别名
+
+添加到 `~/.bashrc` 或 `~/.zshrc`：
+
+```bash
+# Worktree Session Manager 快捷命令
+alias wts='worktree-session'
+alias wts-bind='wts bind'
+alias wts-info='wts info'
+alias wts-list='wts list'
+alias wts-switch='wts switch'
+alias wts-cd='cd "$(wts cd 2>/dev/null || echo .)"'
+
+# 快速进入当前 session 的 worktree
+worktree-cd() {
+    local dir=$(wts cd 2>/dev/null)
+    if [ -n "$dir" ]; then
+        cd "$dir"
+        echo "已进入: $dir"
+        git status
+    else
+        echo "当前 session 未绑定 worktree"
+        echo "使用: wts-bind <repo> <branch>"
+    fi
+}
+```
+
 ## ⚙️ 与 OpenClaw 集成
 
 当与 [OpenClaw](https://openclaw.ai) 配合使用时：
@@ -114,6 +152,8 @@ if result.returncode == 0:
     worktree_path = result.stdout.strip()
     # 在 worktree 中执行操作
     subprocess.run(['git', '-C', worktree_path, 'status'])
+else:
+    print("当前 session 未绑定 worktree")
 ```
 
 ## 🛠️ 技术细节
@@ -131,12 +171,48 @@ if result.returncode == 0:
 3. `CHAT_ID`
 4. 默认值: `default`
 
+### 分支创建策略
+
+- 如果分支不存在，自动创建
+- 如果 worktree 已存在，直接复用
+- 不会自动删除 worktree（防止数据丢失）
+
+## 🐛 故障排除
+
+### 问题：绑定后无法找到 worktree
+
+```bash
+# 检查绑定信息
+worktree-session info
+
+# 手动查看映射文件
+cat ~/.openclaw/worktree-sessions.json
+```
+
+### 问题：Session ID 不正确
+
+```bash
+# 手动指定 session ID 绑定
+worktree-session bind --session "your-session-id" /path/to/repo branch-name
+```
+
+### 问题：worktree 创建失败
+
+```bash
+# 检查原仓库是否有未提交的更改
+cd /path/to/repo
+git status
+
+# 清理后重试
+git worktree prune
+```
+
 ## 💡 最佳实践
 
-1. **命名规范**：分支名使用 `feature-xxx` 或 `bugfix-xxx`
-2. **及时清理**：功能合并后手动删除不需要的 worktree
+1. **命名规范**：分支名使用 `feature-xxx` 或 `bugfix-xxx`，一目了然
+2. **及时清理**：功能合并后，手动删除不需要的 worktree 目录
 3. **不要嵌套**：worktree 目录不要放在原仓库内部
-4. **环境同步**：每个 worktree 需要独立安装依赖
+4. **环境同步**：每个 worktree 需要独立安装依赖（如 `npm install`）
 
 ## 🆚 对比其他方案
 
@@ -145,6 +221,8 @@ if result.returncode == 0:
 | 简单分支切换 | 快速 | 文件互相覆盖，无法并行 |
 | **Worktree Session** | 真正的并行，完全隔离 | 需要更多磁盘空间 |
 | 多次克隆 | 完全隔离 | 浪费空间，历史不同步 |
+
+Worktree 是最佳平衡点：共享 git 历史，独立工作目录。
 
 ## 📄 许可证
 
