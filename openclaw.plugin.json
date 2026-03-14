@@ -1,0 +1,27 @@
+{
+  "name": "paraclaw-b0",
+  "version": "1.0.0",
+  "description": "Git Worktree Session Manager - Bind chat sessions to independent Git worktrees for parallel branch development",
+  "author": "Zilin Fang",
+  "license": "MIT",
+  "homepage": "https://github.com/Barber0/paraclaw-b0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Barber0/paraclaw-b0.git"
+  },
+  "keywords": [
+    "git",
+    "worktree",
+    "session",
+    "branch",
+    "parallel",
+    "development"
+  ],
+  "requires": {
+    "bins": ["python3", "git"],
+    "python": ">=3.8"
+  },
+  "entry": {
+    "cli": "worktree-session"
+  }
+}
