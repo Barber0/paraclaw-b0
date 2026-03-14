@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-paraclaw-b0 - Git Worktree Session Manager
+para-branch - Git Worktree Session Manager
 统一的简单接口：只关心绑定和切换
 """
 
@@ -168,15 +168,15 @@ def main():
     import argparse
     
     parser = argparse.ArgumentParser(
-        description='paraclaw-b0: 绑定聊天会话到Git分支',
+        description='para-branch: 绑定聊天会话到Git分支',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 简单用法:
-  绑定:   paraclaw bind ~/myproject feature-xxx
-  查看:   paraclaw info
-  切换:   paraclaw switch feature-yyy
-  列出:   paraclaw list
-  进入:   cd $(paraclaw cd)
+  绑定:   para-branch bind ~/myproject feature-xxx
+  查看:   para-branch info
+  切换:   para-branch switch feature-yyy
+  列出:   para-branch list
+  进入:   cd $(para-branch cd)
 
 多用户支持:
   不同用户/平台自动隔离，list可以看到所有人的绑定

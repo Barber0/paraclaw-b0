@@ -5,14 +5,14 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setup(
-    name="paraclaw-b0",
+    name="para-branch",
     version="1.0.0",
     author="Zilin Fang",
-    description="Git Worktree Session Manager - Bind chat sessions to independent Git worktrees",
+    description="Git branch session manager for parallel development",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/Barber0/paraclaw-b0",
-    packages=find_packages(),
+    url="https://github.com/Barber0/para-branch",
+    py_modules=["para_branch"],
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
@@ -29,7 +29,7 @@ setup(
     python_requires=">=3.8",
     entry_points={
         "console_scripts": [
-            "paraclaw=paraclaw:main",
+            "para-branch=para_branch:main",
         ],
     },
 )

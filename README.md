@@ -1,24 +1,24 @@
-# paraclaw-b0
+# para-branch
 
 不同群聊，自动隔离，同时开发。
 
 ## 安装
 
 ```bash
-pip install git+https://github.com/Barber0/paraclaw-b0.git
+pip install git+https://github.com/Barber0/para-branch.git
 ```
 
 ## 用法
 
 ```bash
 # 告诉系统：我要在这个群聊开发 xxx 功能
-paraclaw bind ~/myproject feature-xxx
+para-branch bind ~/myproject feature-xxx
 
 # 进入开发目录
-cd $(paraclaw cd)
+cd $(para-branch cd)
 
 # 换功能开发
-paraclaw switch feature-yyy
+para-branch switch feature-yyy
 ```
 
 ## 自然语言

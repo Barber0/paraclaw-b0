@@ -1,13 +1,13 @@
 {
-  "name": "paraclaw-b0",
+  "name": "para-branch",
   "version": "1.0.0",
   "description": "Git Worktree Session Manager - Bind chat sessions to independent Git worktrees",
   "author": "Zilin Fang",
   "license": "MIT",
-  "homepage": "https://github.com/Barber0/paraclaw-b0",
+  "homepage": "https://github.com/Barber0/para-branch",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Barber0/paraclaw-b0.git"
+    "url": "https://github.com/Barber0/para-branch.git"
   },
   "keywords": [
     "git",
